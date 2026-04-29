@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overlay OBS - UMAIN IA</title>
+  <style>
+    :root {
+      --cyan: #00e5ff;
+      --blue: #2f7dff;
+      --violet: #8d5cff;
+      --bg: #010514;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+      font-family: "Montserrat", "Segoe UI", sans-serif;
+      color: #e8fbff;
+    }
+
+    #scene {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      margin: 0 auto;
+      background:
+        radial-gradient(circle at 30% 35%, rgba(0, 206, 255, 0.20), transparent 40%),
+        radial-gradient(circle at 75% 25%, rgba(120, 92, 255, 0.20), transparent 40%),
+        linear-gradient(115deg, #040b1f 0%, #02081a 45%, #061332 100%);
+      box-shadow: inset 0 0 120px rgba(0, 217, 255, 0.15);
+      isolation: isolate;
+    }
+
+    .matrix {
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(90deg, rgba(0, 229, 255, 0.08) 0 1px, transparent 1px 26px),
+        repeating-linear-gradient(0deg, rgba(141, 92, 255, 0.06) 0 1px, transparent 1px 26px);
+      opacity: .35;
+      animation: drift 40s linear infinite;
+    }
+
+    .nodes, .nodes::before {
+      position: absolute;
+      inset: 0;
+      content: "";
+      background-image: radial-gradient(circle, rgba(113, 231, 255, .9) 0 1px, transparent 2px);
+      background-size: 120px 120px;
+      opacity: .45;
+      animation: float 34s linear infinite;
+    }
+
+    .nodes::before {
+      background-size: 160px 160px;
+      opacity: .28;
+      animation-duration: 48s;
+      animation-direction: reverse;
+    }
+
+    .city {
+      position: absolute;
+      bottom: 0;
+      width: 58%;
+      height: 45%;
+      background-repeat: repeat-x;
+      background-position: bottom;
+      opacity: .45;
+      filter: blur(.2px);
+    }
+
+    .city.old {
+      left: 0;
+      background-image: linear-gradient(to top, rgba(11,33,62,.95), rgba(11,33,62,.1)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='350' viewBox='0 0 900 350'%3E%3Cpath fill='%23122f58' d='M0 250h100v-80h20v80h40v-110h50v110h35v-70h15v70h60v-90h40v90h45v-120h70v120h30v-95h35v95h55v-140h80v140h40v-70h70v70h70v100H0z'/%3E%3C/svg%3E");
+      animation: skylineLeft 80s linear infinite;
+    }
+
+    .city.future {
+      right: 0;
+      background-image: linear-gradient(to top, rgba(9,19,56,.95), rgba(9,19,56,.1)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='350' viewBox='0 0 900 350'%3E%3Cpath fill='%23154183' d='M0 260h80v-140h30v140h45v-100h25v100h50v-170h55v170h40v-120h60v120h35v-150h65v150h30v-115h50v115h60v-190h40v190h90v90H0z'/%3E%3C/svg%3E");
+      animation: skylineRight 95s linear infinite;
+    }
+
+    .title {
+      position: absolute;
+      top: 34px;
+      width: 100%;
+      text-align: center;
+      font-size: 54px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 24px rgba(0,220,255,.55);
+    }
+
+    .subtitle {
+      position: absolute;
+      top: 102px;
+      width: 100%;
+      text-align: center;
+      font-size: 24px;
+      letter-spacing: 7px;
+      opacity: .9;
+      color: #8befff;
+    }
+
+    .camera-frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 800px;
+      height: 800px;
+      transform: translate(-50%, -42%);
+      border-radius: 50%;
+      border: 7px solid rgba(0,231,255,.92);
+      box-shadow: 0 0 0 6px rgba(0,112,255,.33), 0 0 45px rgba(0,223,255,.75), inset 0 0 40px rgba(0,124,255,.4);
+      background: transparent;
+    }
+
+    .camera-note {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -45%);
+      font-size: 24px;
+      color: rgba(195, 241, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 6px;
+      pointer-events: none;
+    }
+
+    .cyborg {
+      position: absolute;
+      right: 120px;
+      bottom: 86px;
+      width: 200px;
+      height: 340px;
+      border-radius: 100px 100px 30px 30px;
+      background: linear-gradient(160deg, rgba(0,229,255,.30) 0%, rgba(11,33,70,.70) 42%, rgba(142,92,255,.30) 100%);
+      box-shadow: 0 0 30px rgba(0,229,255,.35);
+      transform: skewX(-6deg);
+      opacity: .84;
+    }
+
+    .ai-marquee {
+      position: absolute;
+      bottom: 14px;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      border-top: 1px solid rgba(0, 229, 255, 0.35);
+      border-bottom: 1px solid rgba(0, 229, 255, 0.35);
+      background: rgba(4, 17, 44, 0.45);
+      backdrop-filter: blur(2px);
+    }
+
+    .ai-marquee span {
+      display: inline-block;
+      padding-left: 100%;
+      font-size: 24px;
+      letter-spacing: 2px;
+      color: #9de9ff;
+      animation: ticker 45s linear infinite;
+    }
+
+    .umain-logo {
+      position: absolute;
+      left: 34px;
+      top: 26px;
+      width: 270px;
+      filter: drop-shadow(0 0 18px rgba(0, 216, 255, .45));
+      opacity: .95;
+    }
+
+    @keyframes drift { from {transform: translate(0,0);} to {transform: translate(-70px, -45px);} }
+    @keyframes float { from {transform: translateX(0);} to {transform: translateX(-140px);} }
+    @keyframes skylineLeft { from {background-position-x: 0;} to {background-position-x: -900px;} }
+    @keyframes skylineRight { from {background-position-x: 0;} to {background-position-x: 900px;} }
+    @keyframes ticker { from {transform: translateX(0);} to {transform: translateX(-100%);} }
+  </style>
+</head>
+<body>
+  <div id="scene">
+    <div class="matrix"></div>
+    <div class="nodes"></div>
+
+    <img class="umain-logo" src="client mystere doc.png" alt="Logo UMAIN" />
+
+    <div class="title">Formation IA — Vision Humaine & Futuriste</div>
+    <div class="subtitle">OVERLAY OBS • UMAIN</div>
+
+    <div class="city old"></div>
+    <div class="city future"></div>
+    <div class="cyborg"></div>
+
+    <div class="camera-frame"></div>
+    <div class="camera-note">Zone Caméra (Transparente)</div>
+
+    <div class="ai-marquee"><span>OpenAI • Anthropic • Google Gemini • Midjourney • Stability AI • Runway • Mistral • Perplexity • Hugging Face • ElevenLabs • Adobe Firefly • NVIDIA • Meta AI • Cohere • xAI •</span></div>
+  </div>
+</body>
+</html>
